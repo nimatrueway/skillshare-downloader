@@ -67,7 +67,12 @@ class Downloader(object):
         if not os.path.exists(base_path):
             os.makedirs(base_path)
 
-        for u in data['_embedded']['units']['_embedded']['units']:
+        try:
+            units = data['_embedded']['units']['_embedded']['units']
+        except:
+            units = [data]
+
+        for u in units:
             for s in u['_embedded']['sessions']['_embedded']['sessions']:
                 video_id = None
 

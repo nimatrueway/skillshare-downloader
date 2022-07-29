@@ -1,7 +1,7 @@
 from downloader import Downloader
 
 cookie = """
-ADD YOUR COOKIE HERE
+PHPSESSID=8eca04603401f57dfd4c75aa2c00348b
 """
 
 dl = Downloader(cookie=cookie)
