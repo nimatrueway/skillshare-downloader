@@ -3,6 +3,8 @@ import json
 import sys
 import re
 import os
+import tempfile
+import shutil
 from slugify import slugify
 
 
@@ -154,22 +156,29 @@ class Downloader(object):
             print('Video already downloaded, skipping...')
             return
 
-        with open(fpath, 'wb') as f:
-            response = requests.get(dl_url, allow_redirects=True, stream=True)
-            total_length = response.headers.get('content-length')
+        _, temp_file = tempfile.mkstemp()
 
-            if not total_length:
-                f.write(response.content)
+        try:
+            with open(temp_file, 'wb') as f:
+                response = requests.get(dl_url, allow_redirects=True, stream=True)
+                total_length = response.headers.get('content-length')
 
-            else:
-                dl = 0
-                total_length = int(total_length)
+                if not total_length:
+                    f.write(response.content)
 
-                for data in response.iter_content(chunk_size=4096):
-                    dl += len(data)
-                    f.write(data)
-                    done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
-                    sys.stdout.flush()
+                else:
+                    dl = 0
+                    total_length = int(total_length)
 
-            print('')
+                    for data in response.iter_content(chunk_size=4096):
+                        dl += len(data)
+                        f.write(data)
+                        done = int(50 * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                        sys.stdout.flush()
+
+                print('')
+
+            shutil.copy(temp_file, fpath)
+        finally:
+            os.remove(temp_file)
